@@ -3,6 +3,8 @@ import markdown
 import requests
 import json
 
+from parser import parse_markdown
+
 
 class NodeType:
     Paragraph = "paragraph"
@@ -39,8 +41,14 @@ def parse_html_to_substack(html_content):
         }]
     }
 def convert_to_substack(md_text):
-    html_content = parse(md_text)
-    substack_post = parse_html_to_substack(html_content)
+    #html_content = parse(md_text)
+    #substack_post = parse_html_to_substack(html_content)
+    contents = parse_markdown(md_text)
+    substack_post = {
+        "type": NodeType.Doc,
+        "content": contents
+    }
+    print(substack_post)
     return substack_post
 
 class SubstackClient:
@@ -109,25 +117,31 @@ class SubstackClient:
             "draft_bylines": [{
                 "id": userId
             }],
-            "draft_body": json.dumps(doc, default=lambda o: o.__dict__, indent=4)
+            "draft_body": json.dumps(doc)
         }
+        with open("output.json", "w") as file:
+            json.dump(draft, file, indent=4)
         resp = self.edit_draft(draft_id, draft)
         return resp
 
     def create_draft(self, markdown_text):
         substack_post = convert_to_substack(markdown_text)
-        substack_post_json = json.dumps(substack_post.__dict__, default=lambda o: o.__dict__, indent=4)
+        substack_post_json = json.dumps(substack_post)
         new_draft = self.create_new_draft(substack_post_json)
         return new_draft
 
 
 if __name__ == "__main__":
+
+    from dotenv import load_dotenv
+    load_dotenv()
     sessionID = environ.get("SUBSTACK_SESSION_ID")
     userId = environ.get("SUBSTACK_USER_ID")
     substackName = environ.get("SUBSTACK_NAME")
     client = SubstackClient(sessionID, substackName)
+    draft_title = "test"
 
-    draft = client.create_draft("test") or {}
-    client.update_draft(draft.get("draft_title", ""))
-
+    #draft = client.create_draft("test") or {}
+    #client.update_draft(draft.get("draft_title", ""))
+    client.update_draft(draft_title)
 
