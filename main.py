@@ -3,7 +3,7 @@ import markdown
 import requests
 import json
 
-from parser import parse_markdown
+from parser import MarkdownConverter
 
 
 class NodeType:
@@ -43,7 +43,9 @@ def parse_html_to_substack(html_content):
 def convert_to_substack(md_text):
     #html_content = parse(md_text)
     #substack_post = parse_html_to_substack(html_content)
-    contents = parse_markdown(md_text)
+    substack_parser = MarkdownConverter()
+    substack_parser.parse_markdown(md_text)
+    contents = substack_parser.convert()
     substack_post = {
         "type": NodeType.Doc,
         "content": contents
