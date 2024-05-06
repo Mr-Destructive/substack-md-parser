@@ -131,12 +131,25 @@ class TestSubstackParser(unittest.TestCase):
         expected_structure = {
             "type": "doc",
             "content": [
-                {"type": "heading", "attrs": {"level": 1}, "content": [{"type": "text", "text": "Heading 1"}]},
-                {"type": "paragraph", "content": [{"type": "text", "text": "This is how you add a new paragraph to your post!"}]}
-            ]
+                {
+                    "type": "heading",
+                    "attrs": {"level": 1},
+                    "content": [{"type": "text", "text": "Heading 1"}],
+                },
+                {
+                    "type": "paragraph",
+                    "content": [
+                        {
+                            "type": "text",
+                            "text": "This is how you add a new paragraph to your post!",
+                        }
+                    ],
+                },
+            ],
         }
         parser = MarkdownConverter()
         parser.parse_markdown(md_text)
+        print(parser.convert(), expected_structure)
         self.assertDictEqual(parser.convert(), expected_structure)
 
     def test_list(self):
@@ -144,12 +157,45 @@ class TestSubstackParser(unittest.TestCase):
         expected_structure = {
             "type": "doc",
             "content": [
-                {"type": "bullet_list", "content": [
-                    {"type": "list_item", "content": [{"type": "paragraph", "content": [{"type": "text", "text": "List item 1"}]}]},
-                    {"type": "list_item", "content": [{"type": "paragraph", "content": [{"type": "text", "text": "List item 2"}]}]},
-                    {"type": "list_item", "content": [{"type": "paragraph", "content": [{"type": "text", "text": "List item 3"}]}]}
-                ]}
-            ]
+                {
+                    "type": "bullet_list",
+                    "content": [
+                        {
+                            "type": "list_item",
+                            "content": [
+                                {
+                                    "type": "paragraph",
+                                    "content": [
+                                        {"type": "text", "text": "List item 1"}
+                                    ],
+                                }
+                            ],
+                        },
+                        {
+                            "type": "list_item",
+                            "content": [
+                                {
+                                    "type": "paragraph",
+                                    "content": [
+                                        {"type": "text", "text": "List item 2"}
+                                    ],
+                                }
+                            ],
+                        },
+                        {
+                            "type": "list_item",
+                            "content": [
+                                {
+                                    "type": "paragraph",
+                                    "content": [
+                                        {"type": "text", "text": "List item 3"}
+                                    ],
+                                }
+                            ],
+                        },
+                    ],
+                }
+            ],
         }
         parser = MarkdownConverter()
         parser.parse_markdown(md_text)
@@ -160,19 +206,295 @@ class TestSubstackParser(unittest.TestCase):
         expected_structure = {
             "type": "doc",
             "content": [
-                {"type": "heading", "attrs": {"level": 2}, "content": [{"type": "text", "text": "Heading 2"}]},
-                {"type": "bullet_list", "content": [
-                    {"type": "list_item", "content": [{"type": "paragraph", "content": [{"type": "text", "text": "List item 1"}]}]},
-                    {"type": "list_item", "content": [{"type": "paragraph", "content": [{"type": "text", "text": "List item 2"}]}]},
-                    {"type": "list_item", "content": [{"type": "paragraph", "content": [{"type": "text", "text": "List item 3"}]}]}
-                ]}
-            ]
+                {
+                    "type": "heading",
+                    "attrs": {"level": 2},
+                    "content": [{"type": "text", "text": "Heading 2"}],
+                },
+                {
+                    "type": "bullet_list",
+                    "content": [
+                        {
+                            "type": "list_item",
+                            "content": [
+                                {
+                                    "type": "paragraph",
+                                    "content": [
+                                        {"type": "text", "text": "List item 1"}
+                                    ],
+                                }
+                            ],
+                        },
+                        {
+                            "type": "list_item",
+                            "content": [
+                                {
+                                    "type": "paragraph",
+                                    "content": [
+                                        {"type": "text", "text": "List item 2"}
+                                    ],
+                                }
+                            ],
+                        },
+                        {
+                            "type": "list_item",
+                            "content": [
+                                {
+                                    "type": "paragraph",
+                                    "content": [
+                                        {"type": "text", "text": "List item 3"}
+                                    ],
+                                }
+                            ],
+                        },
+                    ],
+                },
+            ],
+        }
+        parser = MarkdownConverter()
+        parser.parse_markdown(md_text)
+        self.assertDictEqual(parser.convert(), expected_structure)
+
+    def test_link(self):
+        md_text = "[View Link](https://whoraised.substack.com/)"
+        expected_structure = {
+            "type": "doc",
+            "content": [
+                {
+                    "type": "paragraph",
+                    "content": [
+                        {
+                            "type": "text",
+                            "marks": [
+                                {
+                                    "type": "link",
+                                    "attrs": {
+                                        "href": "https://whoraised.substack.com/",
+                                        "target": "_blank",
+                                        "rel": "noopener noreferrer nofollow",
+                                        "class": None,
+                                    },
+                                }
+                            ],
+                            "text": "View Link",
+                        }
+                    ],
+                }
+            ],
+        }
+        parser = MarkdownConverter()
+        parser.parse_markdown(md_text)
+        self.assertDictEqual(parser.convert(), expected_structure)
+
+    def test_multiple_links(self):
+        md_text = """
+# Hello
+[View Link 1](https://whoraised.substack.com/)
+
+Below is a link
+[View Link 2](https://whoraised.substack.com/)
+
+[View Link 3](https://whoraised.substack.com/)
+        """
+
+        expected_structure = {
+            "type": "doc",
+            "content": [
+                {
+                    "type": "heading",
+                    "attrs": {"level": 1},
+                    "content": [{"type": "text", "text": "Hello"}],
+                },
+                {
+                    "type": "paragraph",
+                    "content": [
+                        {
+                            "type": "text",
+                            "marks": [
+                                {
+                                    "type": "link",
+                                    "attrs": {
+                                        "href": "https://whoraised.substack.com/",
+                                        "target": "_blank",
+                                        "rel": "noopener noreferrer nofollow",
+                                        "class": None,
+                                    },
+                                }
+                            ],
+                            "text": "View Link 1",
+                        }
+                    ],
+                },
+                {"type": "paragraph", "content": []},
+                {
+                    "type": "paragraph",
+                    "content": [{"type": "text", "text": "Below is a link"}],
+                },
+                {
+                    "type": "paragraph",
+                    "content": [
+                        {
+                            "type": "text",
+                            "marks": [
+                                {
+                                    "type": "link",
+                                    "attrs": {
+                                        "href": "https://whoraised.substack.com/",
+                                        "target": "_blank",
+                                        "rel": "noopener noreferrer nofollow",
+                                        "class": None,
+                                    },
+                                }
+                            ],
+                            "text": "View Link 2",
+                        }
+                    ],
+                },
+                {"type": "paragraph", "content": []},
+                {
+                    "type": "paragraph",
+                    "content": [
+                        {
+                            "type": "text",
+                            "marks": [
+                                {
+                                    "type": "link",
+                                    "attrs": {
+                                        "href": "https://whoraised.substack.com/",
+                                        "target": "_blank",
+                                        "rel": "noopener noreferrer nofollow",
+                                        "class": None,
+                                    },
+                                }
+                            ],
+                            "text": "View Link 3",
+                        }
+                    ],
+                },
+            ],
+        }
+        parser = MarkdownConverter()
+        parser.parse_markdown(md_text)
+        self.assertDictEqual(parser.convert(), expected_structure)
+
+    def test_bolden_text(self):
+        md_text = "This is how you **bolden** a word."
+        expected_structure = {
+            "type": "doc",
+            "content": [
+                {
+                    "type": "paragraph",
+                    "content": [
+                        {"type": "text", "text": "This is how you "},
+                        {
+                            "type": "text",
+                            "marks": [
+                                {
+                                    "type": "strong",
+                                }
+                            ],
+                            "text": "bolden",
+                        },
+                        {"type": "text", "text": " a word."},
+                    ],
+                }
+            ],
+        }
+        parser = MarkdownConverter()
+        parser.parse_markdown(md_text)
+        self.assertDictEqual(parser.convert(), expected_structure)
+
+    def test_italic_text(self):
+        md_text = "This is how you *italic* a word."
+        expected_structure = {
+            "type": "doc",
+            "content": [
+                {
+                    "type": "paragraph",
+                    "content": [
+                        {"type": "text", "text": "This is how you "},
+                        {
+                            "type": "text",
+                            "marks": [
+                                {
+                                    "type": "italic",
+                                }
+                            ],
+                            "text": "italic",
+                        },
+                        {"type": "text", "text": " a word."},
+                    ],
+                }
+            ],
+        }
+        parser = MarkdownConverter()
+        parser.parse_markdown(md_text)
+        self.assertDictEqual(parser.convert(), expected_structure)
+
+    def test_strikethrough_text(self):
+        md_text = "This is how you ~~strikethrough~~ a word."
+        expected_structure = {
+            "type": "doc",
+            "content": [
+                {
+                    "type": "paragraph",
+                    "content": [
+                        {"type": "text", "text": "This is how you "},
+                        {
+                            "type": "text",
+                            "marks": [
+                                {
+                                    "type": "strikethrough",
+                                }
+                            ],
+                            "text": "strikethrough",
+                        },
+                        {"type": "text", "text": " a word."},
+                    ],
+                }
+            ],
+        }
+        parser = MarkdownConverter()
+        parser.parse_markdown(md_text)
+        self.assertDictEqual(parser.convert(), expected_structure)
+
+    def test_bold_italics(self):
+        md_text = "This is how you *italic* and **bold** a word."
+        expected_structure = {
+            "type": "doc",
+            "content": [
+                {
+                    "type": "paragraph",
+                    "content": [
+                        {"type": "text", "text": "This is how you "},
+                        {
+                            "type": "text",
+                            "marks": [
+                                {
+                                    "type": "italic",
+                                }
+                            ],
+                            "text": "italic",
+                        },
+                        {"type": "text", "text": " and "},
+                        {
+                            "type": "text",
+                            "marks": [
+                                {
+                                    "type": "strong",
+                                }
+                            ],
+                            "text": "bold",
+                        },
+                        {"type": "text", "text": " a word."},
+                    ],
+                }
+            ],
         }
         parser = MarkdownConverter()
         parser.parse_markdown(md_text)
         self.assertDictEqual(parser.convert(), expected_structure)
 
 
-
-if __name__ == '__main__':
+if __name__ == "__main__":
     unittest.main()
