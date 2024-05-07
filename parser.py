@@ -17,6 +17,7 @@ class MarkdownConverter:
         self.bold_pattern = re.compile(r"\*\*(.*?)\*\*")  # Pattern for bold text
         self.italic_pattern = re.compile(r"\*(.*?)\*")  # Pattern for italic text
         self.strike_pattern = re.compile(r"~~(.*?)~~")  # Pattern for strikethrough text
+        self.blockquote_pattern = re.compile(r"> (.*?)$")  # Pattern for quote
         self.open_tags = []
         self.current_text = ""
 
@@ -119,6 +120,12 @@ class MarkdownConverter:
                             ],
                         }
                     )
+            elif self.blockquote_pattern.match(line):
+                match = self.blockquote_pattern.match(line)
+                content = match.group(1)
+                self.draft_body["content"].append(
+                    {"type": "blockquote", "content": [{"type": "paragraph", "content": [{"type": "text", "text": content}]}]}
+                )
             else:
                 content = self.handle_inline_formatting(line)
                 if content:
@@ -396,8 +403,13 @@ This is how you add a new paragraph to your post!
 This is how you add a new paragraph to your post!
 """
 
+md_text_quote = """
+> This is a blockquote
+"""
+
+
 parser = MarkdownConverter()
-parser.parse_markdown(md_text)
+parser.parse_markdown(md_text_quote)
 parsed_structure = parser.convert()
 
 print(parsed_structure)
@@ -405,7 +417,7 @@ with open("output.json", "w") as file:
     json.dump(parsed_structure, file, indent=4)
 
 expected_dict = json.loads(open("expected_output.json").read())
-expected_output = expected_dict["md_parser"]
+expected_output = expected_dict["blockquote"]
 print(expected_output)
 
 assert parsed_structure == expected_output
