@@ -431,5 +431,40 @@
                 ]
             }
         ]
+    },
+    "code_block": {
+        "type": "doc",
+        "content": [
+            {
+                "type": "paragraph",
+                "content": [
+                    {
+                        "type": "text",
+                        "text": "This is a code block"
+                    }
+                ]
+            },
+            {
+                "type": "code_block",
+                "attrs": {
+                    "language": "python"
+                },
+                "content": [
+                    {
+                        "type": "text",
+                        "text": "print('hello world!')"
+                    }
+                ]
+            },
+            {
+                "type": "paragraph",
+                "content": [
+                    {
+                        "type": "text",
+                        "text": "nothing"
+                    }
+                ]
+            }
+        ]
     }
 }
