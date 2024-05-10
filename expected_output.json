@@ -432,6 +432,56 @@
             }
         ]
     },
+    "code": {
+        "type": "doc",
+        "content": [
+            {
+                "type": "paragraph",
+                "content": [
+                    {
+                        "type": "text",
+                        "text": "This is a "
+                    },
+                    {
+                        "type": "text",
+                        "marks": [
+                            {
+                                "type": "code"
+                            }
+                        ],
+                        "text": "code"
+                    },
+                    {
+                        "type": "text",
+                        "text": " text."
+                    }
+                ]
+            }
+        ]
+    },
+    "code_multi":{
+            "type": "doc",
+            "content": [
+                {
+                    "type": "paragraph",
+                    "content": [
+                        {"type": "text", "text": "This is a "},
+                        {"type": "text", "marks": [{"type": "code"}], "text": "code"},
+                        {"type": "text", "text": " highlighted."}
+                    ]
+                },
+                {"type": "paragraph", "content": [{"type": "text", "text": "nothing."}]},
+                {
+                    "type": "paragraph",
+                    "content": [
+                        {"type": "text", "text": "Some more "},
+                        {"type": "text", "marks": [{"type": "code"}], "text": "code goes here"},
+                        {"type": "text", "text": " and "},
+                        {"type": "text", "marks": [{"type": "code"}], "text": "there"}
+                    ]
+                }
+            ]
+        },
     "code_block": {
         "type": "doc",
         "content": [

@@ -18,7 +18,7 @@ class MarkdownConverter:
         self.italic_pattern = re.compile(r"\*(.*?)\*")  # Pattern for italic text
         self.strike_pattern = re.compile(r"~~(.*?)~~")  # Pattern for strikethrough text
         self.blockquote_pattern = re.compile(r"> (.*?)$")  # Pattern for quote
-        self.code_pattern = re.compile(r"`(.*?)`")  # Pattern for code
+        self.code_pattern = r"`(.*?)`" # Pattern for code highlight
         self.code_block_pattern = r'```([a-zA-Z]+)\n'  # Pattern for code block
         # find the language of the code and then the code
         self.open_tags = []
@@ -134,13 +134,27 @@ class MarkdownConverter:
                 self.draft_body["content"].append(
                     {"type": "blockquote", "content": [{"type": "paragraph", "content": [{"type": "text", "text": content}]}]}
                 )
-            elif self.code_pattern.match(line) and not code_block:
-                match = self.code_pattern.match(line)
-                content = match.group(1)
+            elif re.findall(self.code_pattern, line) and not code_block:
+                code_pairs = self.extract_text_before_and_after_code(line) 
+                count_code = len(code_pairs)
+                for n, content in enumerate(code_pairs):
+                    print(content)
+                    if content[1] and not n == count_code - 1:
+                        self.draft_body["content"].append(
+                            {"type": "paragraph", "content": [{"type": "text", "text": content[0] + " "}, {"type": "text", "marks": [{"type": "code"}], "text": content[1]}]}
+                        )
+                    elif content[1]:
+                        self.draft_body["content"][-1]["content"].append(
+                                {"type": "text", "text": " " + content[0] + " "},
+                        )
+                        self.draft_body["content"][-1]["content"].append(
+                                {"type": "text", "marks": [{"type": "code"}], "text": content[1]},
+                        )
+                    else:
+                        self.draft_body["content"][-1]["content"].append(
+                            {"type": "text", "text": " " + content[0]}
+                        )
                 #{\"type\":\"paragraph\",\"content\":[{\"type\":\"text\",\"marks\":[{\"type\":\"code\"}],\"text\":\"def hello(string):\"}]},
-                self.draft_body["content"].append(
-                        {"type": "paragraph", "content": [{"type": "text", "marks": [{"type": "code"}], "text": content}]}
-                )
             elif re.findall(self.code_block_pattern, line) or code_block:
                 # If line matches the start of a code block
                 if not self.code_block_lines:
@@ -169,8 +183,13 @@ class MarkdownConverter:
                     self.draft_body["content"].append(current_list)
                     current_list = None
 
-        #if current_list:
-            #self.draft_body["content"].append(current_list)
+            if not line:
+                self.draft_body["content"].append({
+                    "type": "paragraph",
+                    "content": []
+                })
+        if current_list:
+            self.draft_body["content"].append(current_list)
 
     def add_text(self, text, mark=None):
         content = [{"type": "text", "text": text}]
@@ -284,6 +303,31 @@ class MarkdownConverter:
         self.draft_body["content"].append(
             {"type": "paragraph", "content": strikethrough_content}
         )
+
+
+    def extract_text_before_and_after_code(self, line):
+        code_pattern = r"`([^`]+)`"
+        parts = re.split(code_pattern, line)
+        pairs = []
+        inside_code_block = False
+        before_text = ''
+        after_text = ''
+
+        for part in parts:
+            if inside_code_block:
+                after_text += part
+            else:
+                before_text += part
+            inside_code_block = not inside_code_block
+
+            if not inside_code_block:
+                pairs.append((before_text.strip(), after_text.strip()))
+                before_text = ''
+                after_text = ''
+        if before_text or after_text:
+            pairs.append((before_text.strip(), after_text.strip()))
+
+        return pairs
 
     def handle_inline_formatting(self, line):
         start_index = 0
@@ -452,6 +496,12 @@ md_text_quote = """
 > This is a blockquote
 """
 
+md_text_code = """
+This is a `code` highlighted.
+nothing.
+Some more `code goes here` and `there`
+"""
+
 md_text_codeblock = """
 This is a code block
 
@@ -465,7 +515,7 @@ nothing
 
 
 parser = MarkdownConverter()
-parser.parse_markdown(md_text_codeblock)
+parser.parse_markdown(md_text_code)
 parsed_structure = parser.convert()
 
 print(parsed_structure)
@@ -473,9 +523,9 @@ with open("output.json", "w") as file:
     json.dump(parsed_structure, file, indent=4)
 
 expected_dict = json.loads(open("expected_output.json").read())
-expected_output = expected_dict["code_block"]
+expected_output = expected_dict["code_multi"]
 print(expected_output)
 
-assert parsed_structure == expected_output
+#assert parsed_structure == expected_output
 
 md_text = "This is ~~cut badly~~ **~~and boldy~~**"

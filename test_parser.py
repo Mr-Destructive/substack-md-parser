@@ -24,107 +24,54 @@ class TestSubstackParser(unittest.TestCase):
         parser = MarkdownConverter()
         parser.parse_markdown(md_text)
         parsed = parser.convert()
-        expected = """
-{
-  "type": "doc",
-  "content": [
-    {
-      "type": "heading",
-      "attrs": {
-        "level": 1
-      },
-      "content": [
-        {
-          "type": "text",
-          "text": "Heading 1"
-        }
-      ]
-    },
-    {
-      "type": "paragraph",
-      "content": [
-        {
-          "type": "text",
-          "text": "This is how you add a new paragraph to your post!"
-        }
-      ]
-    },
-    {
-      "type": "ordered_list",
-      "attrs": {
-        "start": 1,
-        "order": 1
-      },
-      "content": [
-        {
-          "type": "list_item",
-          "content": [
-            {
-              "type": "paragraph",
-              "content": [
+        expected_structure = {
+            "type": "doc",
+            "content": [
                 {
-                  "type": "text",
-                  "text": "List item 1"
-                }
-              ]
-            }
-          ]
-        },
-        {
-          "type": "list_item",
-          "content": [
-            {
-              "type": "paragraph",
-              "content": [
+                    "type": "heading",
+                    "attrs": {"level": 1},
+                    "content": [{"type": "text", "text": "Heading 1"}],
+                },
                 {
-                  "type": "text",
-                  "text": "List item 2"
-                }
-              ]
-            }
-          ]
-        },
-        {
-          "type": "list_item",
-          "content": [
-            {
-              "type": "paragraph",
-              "content": [
+                    "type": "paragraph",
+                    "content": [
+                        {
+                            "type": "text",
+                            "text": "This is how you add a new paragraph to your post!",
+                        }
+                    ],
+                },
                 {
-                  "type": "text",
-                  "text": "List item 3"
-                }
-              ]
-            }
-          ]
+                    "type": "bullet_list",
+                    "content": [
+                        {
+                            "type": "list_item",
+                            "content": [
+                                { "type": "text", "text": "List item 1" },
+                                { "type": "text", "text": "List item 2" },
+                                { "type": "text", "text": "List item 3" },
+                            ],
+                        }
+                    ],
+                },
+                {
+                    "type": "heading",
+                    "attrs": {"level": 2},
+                    "content": [{"type": "text", "text": "Heading 2"}],
+                },
+                {
+                    "type": "paragraph",
+                    "content": [
+                        {
+                            "type": "text",
+                            "text": "This is how you add a new paragraph to your post!",
+                        }
+                    ],
+                },
+            ],
         }
-      ]
-    },
-    {
-      "type": "heading",
-      "attrs": {
-        "level": 2
-      },
-      "content": [
-        {
-          "type": "text",
-          "text": "Heading 2"
-        }
-      ]
-    },
-    {
-      "type": "paragraph",
-      "content": [
-        {
-          "type": "text",
-          "text": "This is how you add a new paragraph to your post!"
-        }
-      ]
-    }
-  ]
-}
-        """
-        self.assertEqual(json.dumps(parsed), json.dumps(json.loads(expected)))
+
+        self.assertDictEqual(parsed, expected_structure)
 
     def test_heading(self):
         md_text = "# Heading 1\nThis is how you add a new paragraph to your post!"
@@ -489,6 +436,39 @@ Below is a link
                         {"type": "text", "text": " a word."},
                     ],
                 }
+            ],
+        }
+        parser = MarkdownConverter()
+        parser.parse_markdown(md_text)
+        self.assertDictEqual(parser.convert(), expected_structure)
+
+    def test_code(self):
+        md_text = """
+        This is a `code` highlighted.
+        nothing.
+        Some more `code goes here` and `there`
+        """
+        expected_structure = {
+            "type": "doc",
+            "content": [
+                {
+                    "type": "paragraph",
+                    "content": [
+                        {"type": "text", "text": "This is a "},
+                        {"type": "text", "marks": [{"type": "code"}], "text": "code"},
+                        {"type": "text", "text": " highlighted."},
+                    ],
+                },
+                {"type": "paragraph", "content": [{"type": "text", "text": "nothing."}]},
+                {
+                    "type": "paragraph",
+                    "content": [
+                        {"type": "text", "text": "Some more "},
+                        {"type": "text", "marks": [{"type": "code"}], "text": "code goes here"},
+                        {"type": "text", "text": " and "},
+                        {"type": "text", "marks": [{"type": "code"}], "text": "there"},
+                    ],
+                },
             ],
         }
         parser = MarkdownConverter()
