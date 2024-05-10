@@ -515,7 +515,7 @@ nothing
 
 
 parser = MarkdownConverter()
-parser.parse_markdown(md_text_code)
+parser.parse_markdown(md_text)
 parsed_structure = parser.convert()
 
 print(parsed_structure)
@@ -523,7 +523,7 @@ with open("output.json", "w") as file:
     json.dump(parsed_structure, file, indent=4)
 
 expected_dict = json.loads(open("expected_output.json").read())
-expected_output = expected_dict["code_multi"]
+expected_output = expected_dict["md_parser"]
 print(expected_output)
 
 #assert parsed_structure == expected_output

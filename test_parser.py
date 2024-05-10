@@ -25,51 +25,107 @@ class TestSubstackParser(unittest.TestCase):
         parser.parse_markdown(md_text)
         parsed = parser.convert()
         expected_structure = {
-            "type": "doc",
-            "content": [
+          "type": "doc",
+          "content": [
+            {
+              "type": "heading",
+              "attrs": {
+                "level": 1
+              },
+              "content": [
                 {
-                    "type": "heading",
-                    "attrs": {"level": 1},
-                    "content": [{"type": "text", "text": "Heading 1"}],
-                },
+                  "type": "text",
+                  "text": "Heading 1"
+                }
+              ]
+            },
+            {
+              "type": "paragraph",
+              "content": [
                 {
-                    "type": "paragraph",
-                    "content": [
+                  "type": "text",
+                  "text": "This is how you add a new paragraph to your post!"
+                }
+              ]
+            },
+            {
+              "type": "ordered_list",
+              "attrs": {
+                "start": 1,
+                "order": 1
+              },
+              "content": [
+                {
+                  "type": "list_item",
+                  "content": [
+                    {
+                      "type": "paragraph",
+                      "content": [
                         {
-                            "type": "text",
-                            "text": "This is how you add a new paragraph to your post!",
+                          "type": "text",
+                          "text": "List item 1"
                         }
-                    ],
+                      ]
+                    }
+                  ]
                 },
                 {
-                    "type": "bullet_list",
-                    "content": [
+                  "type": "list_item",
+                  "content": [
+                    {
+                      "type": "paragraph",
+                      "content": [
                         {
-                            "type": "list_item",
-                            "content": [
-                                { "type": "text", "text": "List item 1" },
-                                { "type": "text", "text": "List item 2" },
-                                { "type": "text", "text": "List item 3" },
-                            ],
+                          "type": "text",
+                          "text": "List item 2"
                         }
-                    ],
+                      ]
+                    }
+                  ]
                 },
                 {
-                    "type": "heading",
-                    "attrs": {"level": 2},
-                    "content": [{"type": "text", "text": "Heading 2"}],
-                },
-                {
-                    "type": "paragraph",
-                    "content": [
+                  "type": "list_item",
+                  "content": [
+                    {
+                      "type": "paragraph",
+                      "content": [
                         {
-                            "type": "text",
-                            "text": "This is how you add a new paragraph to your post!",
+                          "type": "text",
+                          "text": "List item 3"
                         }
-                    ],
-                },
-            ],
-        }
+                      ]
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+                "type": "paragraph",
+                "content": []
+            },
+            {
+              "type": "heading",
+              "attrs": {
+                "level": 2
+              },
+              "content": [
+                {
+                  "type": "text",
+                  "text": "Heading 2"
+                }
+              ]
+            },
+            {
+              "type": "paragraph",
+              "content": [
+                {
+                  "type": "text",
+                  "text": "This is how you add a new paragraph to your post!"
+                }
+              ]
+            }
+          ]
+}
 
         self.assertDictEqual(parsed, expected_structure)
 
