@@ -31,9 +31,12 @@ class MarkdownConverter:
 
         current_list = None
         code_block = False
+        language = ""
 
         for line in lines:
-            line = line.strip()
+            if not code_block:
+                line = line.strip()
+
             if line.startswith("```") and line != "```":
                 line = line + "\n"
                 code_block = True
@@ -373,16 +376,20 @@ class MarkdownConverter:
     def add_codeblock(self, language, content):
         # remove first and last 
         content = content[1:-1]
-        self.draft_body["content"].append(
+        code_blocks = [
             {
                 "type": "code_block",
                 "attrs": {"language": language},
                 "content": [
-                    {"type": "text", "text": code}
-                    for code in content
-                ]
+                    {"type": "text", "text": line}
+                ],
             }
-        )
+            for line in content
+        ]
+        for code_block in code_blocks:
+            self.draft_body["content"].append(
+                    code_block
+            )
 
 
     def convert(self):
@@ -507,6 +514,8 @@ This is a code block
 
 ```python
 print('hello world!')
+def hello():
+    print('function world!')
 ```
 
 nothing
@@ -515,7 +524,7 @@ nothing
 
 
 parser = MarkdownConverter()
-parser.parse_markdown(md_text)
+parser.parse_markdown(md_text_codeblock)
 parsed_structure = parser.convert()
 
 print(parsed_structure)
@@ -523,9 +532,11 @@ with open("output.json", "w") as file:
     json.dump(parsed_structure, file, indent=4)
 
 expected_dict = json.loads(open("expected_output.json").read())
-expected_output = expected_dict["md_parser"]
+expected_output = expected_dict["code_block"]
+print()
+print()
 print(expected_output)
 
-#assert parsed_structure == expected_output
+assert parsed_structure == expected_output
 
 md_text = "This is ~~cut badly~~ **~~and boldy~~**"

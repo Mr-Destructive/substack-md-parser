@@ -495,6 +495,10 @@
                 ]
             },
             {
+                "type": "paragraph",
+                "content": []
+            },
+            {
                 "type": "code_block",
                 "attrs": {
                     "language": "python"
@@ -505,6 +509,34 @@
                         "text": "print('hello world!')"
                     }
                 ]
+            },
+            {
+                "type": "code_block",
+                "attrs": {
+                    "language": "python"
+                },
+                "content": [
+                    {
+                        "type": "text",
+                        "text": "def hello():"
+                    }
+                ]
+            },
+            {
+                "type": "code_block",
+                "attrs": {
+                    "language": "python"
+                },
+                "content": [
+                    {
+                        "type": "text",
+                        "text": "    print('function world!')"
+                    }
+                ]
+            },
+            {
+                "type": "paragraph",
+                "content": []
             },
             {
                 "type": "paragraph",

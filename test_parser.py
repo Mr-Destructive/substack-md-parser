@@ -531,6 +531,103 @@ Below is a link
         parser.parse_markdown(md_text)
         self.assertDictEqual(parser.convert(), expected_structure)
 
+    def test_link_list(self):
+        md_text = """
+        - This is a link [View 1](https://whoraised.substack.com/)
+        - [View 2](https://whoraised.substack.com/)
+        - [View 3](https://whoraised.substack.com/)
+        """
+        expected_structure ={
+            "type": "doc",
+            "content": [
+                {
+                    "type": "bullet_list",
+                    "content": [
+                        {
+                            "type": "list_item",
+                            "content": [
+                                {
+                                    "type": "paragraph",
+                                    "content": [
+                                        {
+                                            "type": "text",
+                                            "content": "This is a link ",
+
+                                        },
+                                        {
+                                            "type": "text",
+                                            "marks": [
+                                                {
+                                                    "type": "link",
+                                                    "attrs": {
+                                                        "href": "https://whoraised.substack.com/",
+                                                        "target": "_blank",
+                                                        "rel": "noopener noreferrer nofollow",
+                                                        "class": None,
+                                                    },
+                                                }
+                                            ],
+                                            "text": "View 1",
+                                        }
+                                    ],
+                                }
+                            ],
+                        },
+                        {
+                            "type": "list_item",
+                            "content": [
+                                {
+                                    "type": "paragraph",
+                                    "content": [
+                                        {
+                                            "type": "text",
+                                            "marks": [
+                                                {
+                                                    "type": "link",
+                                                    "attrs": {
+                                                        "href": "https://whoraised.substack.com/",
+                                                        "target": "_blank",
+                                                        "rel": "noopener noreferrer nofollow",
+                                                        "class": None,
+                                                    },
+                                                }
+                                            ],
+                                            "text": "View 2",
+                                        }
+                                    ],
+                                }
+                            ],
+                        },
+                        {
+                            "type": "list_item",
+                            "content": [
+                                {
+                                    "type": "paragraph",
+                                    "content": [
+                                        {
+                                            "type": "text",
+                                            "marks": [
+                                                {
+                                                    "type": "link",
+                                                    "attrs": {
+                                                        "href": "https://whoraised.substack.com/",
+                                                        "target": "_blank",
+                                                        "rel": "noopener noreferrer nofollow",
+                                                        "class": None,
+                                                    },
+                                                }
+                                            ],
+                                            "text": "View 3",
+                                        }
+                                    ],
+                                }
+                            ],
+                        },
+                    ],
+                },
+            ],
+        }
+
 
 if __name__ == "__main__":
     unittest.main()
