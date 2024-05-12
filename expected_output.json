@@ -506,31 +506,7 @@
                 "content": [
                     {
                         "type": "text",
-                        "text": "print('hello world!')"
-                    }
-                ]
-            },
-            {
-                "type": "code_block",
-                "attrs": {
-                    "language": "python"
-                },
-                "content": [
-                    {
-                        "type": "text",
-                        "text": "def hello():"
-                    }
-                ]
-            },
-            {
-                "type": "code_block",
-                "attrs": {
-                    "language": "python"
-                },
-                "content": [
-                    {
-                        "type": "text",
-                        "text": "    print('function world!')"
+                        "text": "print('hello world!')\ndef hello():\n    print('function world!')"
                     }
                 ]
             },

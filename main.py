@@ -1,7 +1,9 @@
 from os import environ
+import os
 import markdown
 import requests
 import json
+import tempfile
 
 from parser import MarkdownConverter
 
@@ -28,36 +30,65 @@ def parse(s):
     return html_content
 
 def parse_html_to_substack(html_content):
-    return {
-        "type": NodeType.Doc,
-        "content": [{
-            "type": NodeType.Paragraph,
-            "content": [
-                {
-                    "type": NodeType.Text,
-                    "text": html_content
-                }
-            ]
-        }]
-    }
+    return html_content
+    #return {
+    #    "type": NodeType.Doc,
+    #    "content": [{
+    #        "type": NodeType.Paragraph,
+    #        "content": [
+    #            {
+    #                "type": NodeType.Text,
+    #                "text": html_content
+    #            }
+    #        ]
+    #    }]
+    #}
 def convert_to_substack(md_text):
     #html_content = parse(md_text)
     #substack_post = parse_html_to_substack(html_content)
     substack_parser = MarkdownConverter()
     substack_parser.parse_markdown(md_text)
     contents = substack_parser.convert()
-    substack_post = {
-        "type": NodeType.Doc,
-        "content": contents
-    }
-    print(substack_post)
+    substack_post = contents
+    #substack_post = {
+    #    "type": NodeType.Doc,
+    #    "content": contents
+    #}
     return substack_post
 
 class SubstackClient:
-    def __init__(self, session_id, substack_name):
-        self.session_id = session_id
+    def __init__(self, substack_name, userId, email, password, magic_link):
         self.substack_name = substack_name
         self.substack_url = f"https://{self.substack_name}.substack.com"
+        self.client = requests.Session()
+        self.userId = userId
+        auth_response = self.login(email, password, magic_link)
+        cookies = auth_response.cookies
+        self.client.cookies = cookies
+        self.split_cookies()
+        self.session_id = self.cookie_dict.get("substack.sid")
+
+    def split_cookies(self):
+        self.cookie_dict = {}
+        for cookie, value in self.client.cookies.get_dict().items():
+            self.cookie_dict[cookie] = value
+
+    def login(self, email, password, magic_link):
+        if email and password and not magic_link:
+            endpoint = f"https://substack.com/api/v1/login"
+            payload = {
+                "captcha_response": None,
+                "email": email,
+                "password": password,
+                "redirect": "/",
+                "for_pub": "",
+            }
+            response = requests.post(endpoint, json=payload)
+        elif magic_link:
+            response = requests.get(magic_link)
+        else:
+            raise ValueError("Invalid email, password, or magic link.")
+        return response
 
     def create_new_draft(self, draft):
         endpoint = f"{self.substack_url}/api/v1/drafts/"
@@ -74,16 +105,16 @@ class SubstackClient:
     def _send_request(self, endpoint, payload, http_method):
         headers = {
             "Content-Type": "application/json",
-            "Cookie": f"substack.sid={self.session_id};"
+            "Cookie": f"substack.sid={self.session_id}",
         }
         #cookies = RequestsCookieJar()
         #cookies.set("substack.sid", self.session_id)
 
         try:
             if http_method == "POST":
-                response = requests.post(endpoint, headers=headers, json=payload)
+                response = self.client.post(endpoint, headers=headers, json=payload)
             elif http_method == "PUT":
-                response = requests.put(endpoint, headers=headers, json=payload)
+                response = self.client.put(endpoint, headers=headers, json=payload)
             else:
                 response = requests.get(endpoint, headers=headers)
 
@@ -117,20 +148,67 @@ class SubstackClient:
         draft = {
             "draft_title": "test",
             "draft_bylines": [{
-                "id": userId
+                "id": int(self.userId),
+                "is_guest": False
             }],
-            "draft_body": json.dumps(doc)
-        }
-        with open("output.json", "w") as file:
+            "draft_body": json.dumps(doc),
+            "draft_subtitle": "",
+            "draft_podcast_url": "",
+            "draft_podcast_duration": None,
+            "draft_video_upload_id": None,
+            "draft_podcast_upload_id": None,
+            "draft_podcast_preview_upload_id": None,
+            "draft_voiceover_upload_id": None,
+            "section_chosen": False,
+            "draft_section_id": None,
+            "free_podcast_url": None,
+    }
+        with open("output1.json", "w") as file:
             json.dump(draft, file, indent=4)
         resp = self.edit_draft(draft_id, draft)
         return resp
 
-    def create_draft(self, markdown_text):
+    def create_draft(self, title, markdown_text):
         substack_post = convert_to_substack(markdown_text)
         substack_post_json = json.dumps(substack_post)
-        new_draft = self.create_new_draft(substack_post_json)
+        # convert to json string
+        substack_json = substack_post_json
+        draft = {
+            "draft_title": title,
+            "draft_bylines": [{
+                "id": int(self.userId),
+                "is_guest": False
+            }],
+            "draft_body": substack_json,
+            "draf_subtitle": "",
+            "draft_podcast_url": "",
+            "draft_podcast_duration": None,
+            "draft_video_upload_id": None,
+            "draft_podcast_upload_id": None,
+            "draft_podcast_preview_upload_id": None,
+            "draft_voiceover_upload_id": None,
+            "section_chosen": False,
+            "draft_section_id": None,
+            "audience": "everyone",
+            "type": "newsletter",
+        }
+        # create a tmp file
+        file_name = tempfile.mkstemp()
+        tmp_draft = json.dump(draft, open(file_name[1], "w"))
+        draft = json.load(open(file_name[1], "r"))
+        os.remove(file_name[1])
+        new_draft = self.create_new_draft(draft)
         return new_draft
+
+def send_magic_link(email):
+    body = {
+        "email": email,
+        "redirect": "/",
+        "for_pub": "",
+    }
+    endpoint = f"https://substack.com/api/v1/email-login/"
+    response = requests.post(endpoint, json=body)
+    print("Magic link sent!")
 
 
 if __name__ == "__main__":
@@ -140,10 +218,19 @@ if __name__ == "__main__":
     sessionID = environ.get("SUBSTACK_SESSION_ID")
     userId = environ.get("SUBSTACK_USER_ID")
     substackName = environ.get("SUBSTACK_NAME")
-    client = SubstackClient(sessionID, substackName)
-    draft_title = "test"
+    email = environ.get("SUBSTACK_EMAIL")
+    password = environ.get("SUBSTACK_PASSWORD")
+    magic_link = environ.get("SUBSTACK_MAGIC_LINK")
+    if not password and not magic_link:
+        send_magic_link(email)
+        magic_link = input("Enter magic link: ")
 
-    #draft = client.create_draft("test") or {}
+    client = SubstackClient(substackName, userId, email, password, magic_link)
+    draft_title = "test 123"
+
+    #print(client.get_all_drafts())
+    #draft = client.get_draft("144553105")
+    draft = client.create_draft(draft_title, "") or {}
     #client.update_draft(draft.get("draft_title", ""))
-    client.update_draft(draft_title)
+    #client.update_draft(draft_title)
 

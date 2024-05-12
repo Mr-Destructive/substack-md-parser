@@ -376,15 +376,15 @@ class MarkdownConverter:
     def add_codeblock(self, language, content):
         # remove first and last 
         content = content[1:-1]
+        combine_code_block = "\n".join(content)
         code_blocks = [
             {
                 "type": "code_block",
                 "attrs": {"language": language},
                 "content": [
-                    {"type": "text", "text": line}
+                    {"type": "text", "text": combine_code_block}
                 ],
             }
-            for line in content
         ]
         for code_block in code_blocks:
             self.draft_body["content"].append(
