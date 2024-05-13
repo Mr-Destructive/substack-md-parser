@@ -522,21 +522,23 @@ nothing
 
 """
 
+def main():
+    parser = MarkdownConverter()
+    parser.parse_markdown(md_text_codeblock)
+    parsed_structure = parser.convert()
 
-parser = MarkdownConverter()
-parser.parse_markdown(md_text_codeblock)
-parsed_structure = parser.convert()
+    print(parsed_structure)
+    with open("output.json", "w") as file:
+        json.dump(parsed_structure, file, indent=4)
 
-print(parsed_structure)
-with open("output.json", "w") as file:
-    json.dump(parsed_structure, file, indent=4)
+    expected_dict = json.loads(open("expected_output.json").read())
+    expected_output = expected_dict["code_block"]
+    print()
+    print()
+    print(expected_output)
 
-expected_dict = json.loads(open("expected_output.json").read())
-expected_output = expected_dict["code_block"]
-print()
-print()
-print(expected_output)
+    assert parsed_structure == expected_output
 
-assert parsed_structure == expected_output
+    md_text = "This is ~~cut badly~~ **~~and boldy~~**"
 
-md_text = "This is ~~cut badly~~ **~~and boldy~~**"
+#main()

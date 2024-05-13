@@ -57,24 +57,30 @@ def convert_to_substack(md_text):
     return substack_post
 
 class SubstackClient:
-    def __init__(self, substack_name, userId, email, password, magic_link):
+    def __init__(self, substack_name, userId, email, password, magic_link, session_id):
         self.substack_name = substack_name
         self.substack_url = f"https://{self.substack_name}.substack.com"
         self.client = requests.Session()
         self.userId = userId
-        auth_response = self.login(email, password, magic_link)
+        auth_response = self.login(email, password, magic_link, session_id)
         cookies = auth_response.cookies
         self.client.cookies = cookies
         self.split_cookies()
-        self.session_id = self.cookie_dict.get("substack.sid")
+        self.session_id = self.cookie_dict.get("substack.sid", "")
+        with open("session_id.txt", "w") as file:
+            file.write(self.session_id)
 
     def split_cookies(self):
         self.cookie_dict = {}
         for cookie, value in self.client.cookies.get_dict().items():
             self.cookie_dict[cookie] = value
 
-    def login(self, email, password, magic_link):
-        if email and password and not magic_link:
+    def login(self, email, password, magic_link, session_id):
+        if session_id:
+            self.client = requests.Session()
+            self.client.cookies.set("substack.sid", session_id)
+            response = self.client
+        elif email and password and not magic_link:
             endpoint = f"https://substack.com/api/v1/login"
             payload = {
                 "captcha_response": None,
@@ -101,6 +107,14 @@ class SubstackClient:
     def get_draft(self, draft_id):
         endpoint = f"{self.substack_url}/api/v1/drafts/{draft_id}/"
         return self._send_request(endpoint, None, "GET")
+
+    def get_draft_by_title(self, title):
+        drafts = self.get_all_drafts()
+        filtered_draft = self.filter_drafts_by_title(drafts, title)
+        if filtered_draft:
+            return filtered_draft
+        else:
+            return None
 
     def _send_request(self, endpoint, payload, http_method):
         headers = {
@@ -130,7 +144,14 @@ class SubstackClient:
         return resp.get("posts", [])
 
     def filter_drafts_by_title(self, drafts, title):
-        return [draft for draft in drafts if draft.get("draft_title") == title]
+        draft = [draft for draft in drafts if draft.get("draft_title") == title]
+        if draft:
+            draft = draft[0]
+        else:
+            return None
+        
+        draft_obj = self._send_request(f"{self.substack_url}/api/v1/drafts/{draft.get('id')}/", None, "GET")
+        return draft_obj
 
     def update_draft(self, title):
         drafts = self.get_all_drafts()
@@ -225,7 +246,7 @@ if __name__ == "__main__":
         send_magic_link(email)
         magic_link = input("Enter magic link: ")
 
-    client = SubstackClient(substackName, userId, email, password, magic_link)
+    client = SubstackClient(substackName, userId, email, password, magic_link, sessionID)
     draft_title = "test 123"
 
     #print(client.get_all_drafts())
