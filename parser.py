@@ -34,8 +34,8 @@ class MarkdownConverter:
         language = ""
 
         for line in lines:
-            if not code_block:
-                line = line.strip()
+            #if not code_block:
+            #    line = line.strip()
 
             if line.startswith("```") and line != "```":
                 line = line + "\n"
@@ -138,24 +138,26 @@ class MarkdownConverter:
                     {"type": "blockquote", "content": [{"type": "paragraph", "content": [{"type": "text", "text": content}]}]}
                 )
             elif re.findall(self.code_pattern, line) and not code_block:
+                """
+    Some more `code goes here`, `some`, `more`, and `somehere` and `there`
+                """
                 code_pairs = self.extract_text_before_and_after_code(line) 
                 count_code = len(code_pairs)
+                self.draft_body["content"].append(
+                    {"type": "paragraph", "content": []}
+                )
                 for n, content in enumerate(code_pairs):
-                    print(content)
+                    if content[0]:
+                        self.draft_body["content"][-1]["content"].append(
+                            {"type": "text", "text": content[0]}
+                        )
                     if content[1] and not n == count_code - 1:
-                        self.draft_body["content"].append(
-                            {"type": "paragraph", "content": [{"type": "text", "text": content[0] + " "}, {"type": "text", "marks": [{"type": "code"}], "text": content[1]}]}
+                        self.draft_body["content"][-1]["content"].append(
+                            {"type": "text", "marks": [{"type": "code"}], "text": content[1]}
                         )
                     elif content[1]:
                         self.draft_body["content"][-1]["content"].append(
-                                {"type": "text", "text": " " + content[0] + " "},
-                        )
-                        self.draft_body["content"][-1]["content"].append(
                                 {"type": "text", "marks": [{"type": "code"}], "text": content[1]},
-                        )
-                    else:
-                        self.draft_body["content"][-1]["content"].append(
-                            {"type": "text", "text": " " + content[0]}
                         )
                 #{\"type\":\"paragraph\",\"content\":[{\"type\":\"text\",\"marks\":[{\"type\":\"code\"}],\"text\":\"def hello(string):\"}]},
             elif re.findall(self.code_block_pattern, line) or code_block:
@@ -324,11 +326,11 @@ class MarkdownConverter:
             inside_code_block = not inside_code_block
 
             if not inside_code_block:
-                pairs.append((before_text.strip(), after_text.strip()))
+                pairs.append((before_text, after_text))
                 before_text = ''
                 after_text = ''
         if before_text or after_text:
-            pairs.append((before_text.strip(), after_text.strip()))
+            pairs.append((before_text, after_text))
 
         return pairs
 
@@ -506,7 +508,13 @@ md_text_quote = """
 md_text_code = """
 This is a `code` highlighted.
 nothing.
-Some more `code goes here` and `there`
+Some more `code goes here` `somehere` and `there`
+"""
+
+md_text_code_2 = """
+This is a `code` highlighted.
+nothing.
+Some more `code goes here`, `some`, `more`, and `somehere` and `there`
 """
 
 md_text_codeblock = """
@@ -522,9 +530,17 @@ nothing
 
 """
 
+md_text_list_code = """
+Hello
+- This could be `code` you know, just `like` this
+- Maybe this breaks the `code` [stuff](https://whoraised.substack.com/)
+- who knows what **else** could be broken
+
+"""
+
 def main():
     parser = MarkdownConverter()
-    parser.parse_markdown(md_text_codeblock)
+    parser.parse_markdown(md_text_list_code)
     parsed_structure = parser.convert()
 
     print(parsed_structure)
@@ -532,7 +548,7 @@ def main():
         json.dump(parsed_structure, file, indent=4)
 
     expected_dict = json.loads(open("expected_output.json").read())
-    expected_output = expected_dict["code_block"]
+    expected_output = expected_dict["code_links_in_list"]
     print()
     print()
     print(expected_output)

@@ -482,6 +482,35 @@
                 }
             ]
         },
+    "code_2":{
+            "type": "doc",
+            "content": [
+                {
+                    "type": "paragraph",
+                    "content": [
+                        {"type": "text", "text": "This is a "},
+                        {"type": "text", "marks": [{"type": "code"}], "text": "code"},
+                        {"type": "text", "text": " highlighted."}
+                    ]
+                },
+                {"type": "paragraph", "content": [{"type": "text", "text": "nothing."}]},
+                {
+                    "type": "paragraph",
+                    "content": [
+                        {"type": "text", "text": "Some more "},
+                        {"type": "text", "marks": [{"type": "code"}], "text": "code goes here"},
+                        {"type": "text", "text": ", "},
+                        {"type": "text", "marks": [{"type": "code"}], "text": "some"},
+                        {"type": "text", "text": ", "},
+                        {"type": "text", "marks": [{"type": "code"}], "text": "more"},
+                        {"type": "text", "text": ", and "},
+                        {"type": "text", "marks": [{"type": "code"}], "text": "somehere"},
+                        {"type": "text", "text": " and "},
+                        {"type": "text", "marks": [{"type": "code"}], "text": "there"}
+                    ]
+                }
+            ]
+        },
     "code_block": {
         "type": "doc",
         "content": [
@@ -520,6 +549,130 @@
                     {
                         "type": "text",
                         "text": "nothing"
+                    }
+                ]
+            }
+        ]
+    },
+    "code_links_in_list": {
+        "type": "doc",
+        "content": [
+            {
+                "type": "paragraph",
+                "content": [
+                    {
+                        "type": "text",
+                        "text": "Hello"
+                    }
+                ]
+            },
+            {
+                "type": "bullet_list",
+                "content": [
+                    {
+                        "type": "list_item",
+                        "content": [
+                            {
+                                "type": "paragraph",
+                                "content": [
+                                    {
+                                        "type": "text",
+                                        "text": "This could be "
+                                    },
+                                    {
+                                        "type": "text",
+                                        "marks": [
+                                            {
+                                                "type": "code"
+                                            }
+                                        ],
+                                        "text": "code"
+                                    },
+                                    {
+                                        "type": "text",
+                                        "text": " you know, just "
+                                    },
+                                    {
+                                        "type": "text",
+                                        "marks": [
+                                            {
+                                                "type": "code"
+                                            }
+                                        ],
+                                        "text": "like"
+                                    },
+                                    {
+                                        "type": "text",
+                                        "text": " this"
+                                    }
+                                ]
+                            }
+                        ]
+                    },
+                    {
+                        "type": "list_item",
+                        "content": [
+                            {
+                                "type": "paragraph",
+                                "content": [
+                                    {
+                                        "type": "text",
+                                        "text": "Maybe this breaks the "
+                                    },
+                                    {
+                                        "type": "text",
+                                        "marks": [
+                                            {
+                                                "type": "code"
+                                            }
+                                        ],
+                                        "text": "code"
+                                    },
+                                    {
+                                        "type": "text",
+                                        "marks": [
+                                            {
+                                                "type": "link",
+                                                "attrs": {
+                                                    "href": "https://whoraised.substack.com/",
+                                                    "target": "_blank",
+                                                    "rel": "noopener noreferrer nofollow",
+                                                    "class": null
+                                                }
+                                            }
+                                        ],
+                                        "text": "stuff"
+                                    }
+                                ]
+                            }
+                        ]
+                    },
+                    {
+                        "type": "list_item",
+                        "content": [
+                            {
+                                "type": "paragraph",
+                                "content": [
+                                    {
+                                        "type": "text",
+                                        "text": "who knows what "
+                                    },
+                                    {
+                                        "type": "text",
+                                        "marks": [
+                                            {
+                                                "type": "strong"
+                                            }
+                                        ],
+                                        "text": "else"
+                                    },
+                                    {
+                                        "type": "text",
+                                        "text": " could be broken"
+                                    }
+                                ]
+                            }
+                        ]
                     }
                 ]
             }

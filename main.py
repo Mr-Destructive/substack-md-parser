@@ -157,7 +157,7 @@ class SubstackClient:
         drafts = self.get_all_drafts()
         filtered_drafts = client.filter_drafts_by_title(drafts, title)
         if filtered_drafts:
-            draft_id = filtered_drafts[0].get("id", -1)
+            draft_id = filtered_drafts.get("id", -1)
         else:
             exit(1)
 
@@ -247,11 +247,11 @@ if __name__ == "__main__":
         magic_link = input("Enter magic link: ")
 
     client = SubstackClient(substackName, userId, email, password, magic_link, sessionID)
-    draft_title = "test 123"
+    draft_title = "test"
 
-    #print(client.get_all_drafts())
+    print(client.get_all_drafts())
     #draft = client.get_draft("144553105")
-    draft = client.create_draft(draft_title, "") or {}
+    #draft = client.create_draft(draft_title, "") or {}
     #client.update_draft(draft.get("draft_title", ""))
-    #client.update_draft(draft_title)
+    client.update_draft(draft_title)
 

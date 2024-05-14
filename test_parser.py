@@ -11,14 +11,14 @@ class TestSubstackParser(unittest.TestCase):
         import json
 
         md_text = """
-        # Heading 1
-        This is how you add a new paragraph to your post!
-        1. List item 1
-        2. List item 2
-        3. List item 3
+# Heading 1
+This is how you add a new paragraph to your post!
+1. List item 1
+2. List item 2
+3. List item 3
 
-        ## Heading 2
-        This is how you add a new paragraph to your post!
+## Heading 2
+This is how you add a new paragraph to your post!
         """
 
         parser = MarkdownConverter()
@@ -500,9 +500,9 @@ Below is a link
 
     def test_code(self):
         md_text = """
-        This is a `code` highlighted.
-        nothing.
-        Some more `code goes here` and `there`
+This is a `code` highlighted.
+nothing.
+Some more `code goes here` and `there`
         """
         expected_structure = {
             "type": "doc",
