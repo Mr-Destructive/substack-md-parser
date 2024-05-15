@@ -25,6 +25,35 @@ class MarkdownConverter:
         self.code_block_lines = []
         self.current_text = ""
 
+    def parse_text(self, text):
+        line = text
+        content_list = []
+        if self.blockquote_pattern.match(line):
+            match = self.blockquote_pattern.match(line)
+            content = match.group(1)
+            self.draft_body["content"].append(
+                {"type": "blockquote", "content": [{"type": "paragraph", "content": [{"type": "text", "text": content}]}]}
+            )
+        elif re.findall(self.code_pattern, line):
+            code_pairs = self.extract_text_before_and_after_code(line) 
+            count_code = len(code_pairs)
+            content_list.append(
+                {"type": "paragraph", "content": []}
+            )
+            for n, content in enumerate(code_pairs):
+                if content[0]:
+                    content_list.append({"type": "text", "text": content[0]})
+                if content[1] and not n == count_code - 1:
+                    content_list.append({"type": "text", "marks": [{"type": "code"}], "text": content[1]})
+                elif content[1]:
+                    content_list.append({"type": "text", "marks": [{"type": "code"}], "text": content[1]})
+        else:
+            content_list = self.handle_inline_formatting(line)
+
+        return content_list
+
+
+
     def parse_markdown(self, md_text):
         # Split markdown text into lines
         lines = md_text.strip().split("\n")
@@ -50,15 +79,19 @@ class MarkdownConverter:
                 if current_list is None:
                     current_list = {"type": "bullet_list", "content": []}
                 list_item = self.unordered_list_pattern.match(line).group(1).strip()
+                list_data = []
+                for item in list_item.split("\n"):
+                    data = self.parse_text(item)
+                    list_data.append(
+                        {
+                            "type": "paragraph",
+                            "content": data
+                        }
+                    )
                 current_list["content"].append(
                     {
                         "type": "list_item",
-                        "content": [
-                            {
-                                "type": "paragraph",
-                                "content": [{"type": "text", "text": list_item}],
-                            }
-                        ],
+                        "content": list_data
                     }
                 )
             elif self.ordered_list_pattern.match(line):
@@ -74,14 +107,19 @@ class MarkdownConverter:
                     }
 
                 list_item = self.ordered_list_pattern.match(line).group(2).strip()
+                list_data = []
+                for item in list_item.split("\n"):
+                    data = self.parse_text(item)
+                    list_data.append(
+                        {
+                            "type": "paragraph",
+                            "content": data
+                        }
+                    )
                 current_list["content"].append(
                     {
                         "type": "list_item",
-                        "content": [
-                            {
-                                "type": "paragraph",
-                                "content": [{"type": "text", "text": list_item}]},
-                        ],
+                        "content": list_data
                     }
                 )
             elif self.link_pattern.search(line):
@@ -535,12 +573,25 @@ Hello
 - This could be `code` you know, just `like` this
 - Maybe this breaks the `code` [stuff](https://whoraised.substack.com/)
 - who knows what **else** could be broken
+"""
 
+md_text_nested_list = """
+- This is a list
+    - List item 1
+    - List item 2
+    - List item 3
+- List item 2
 """
 
 def main():
+    md_text = """
+Hello
+- This could be `code` you know, just `like` this
+- Maybe this breaks the `code` [stuff](https://whoraised.substack.com/)
+- who knows what **else** could be broken
+    """
     parser = MarkdownConverter()
-    parser.parse_markdown(md_text_list_code)
+    parser.parse_markdown(md_text)
     parsed_structure = parser.convert()
 
     print(parsed_structure)
@@ -556,5 +607,6 @@ def main():
     assert parsed_structure == expected_output
 
     md_text = "This is ~~cut badly~~ **~~and boldy~~**"
+
 
 #main()
