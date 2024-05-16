@@ -28,6 +28,53 @@ class MarkdownConverter:
     def parse_text(self, text):
         line = text
         content_list = []
+        if self.link_pattern.search(line):
+            match = self.link_pattern.search(line)
+            link_text = match.group(1)
+            link_url = match.group(2)
+            text_before_link = line[: match.start()]
+            text_after_link = line[match.end() :]
+            link_content = self.add_link(link_text, link_url)
+            if text_before_link and text_after_link:
+                content_list.append(
+                    {
+                        "type": "paragraph",
+                        "content": [
+                            {"type": "text", "text": text_before_link},
+                            link_content,
+                            {"type": "text", "text": text_after_link},
+                        ],
+                    }
+                )
+            elif text_before_link:
+                content_list.append(
+                    {
+                        "type": "paragraph",
+                        "content": [
+                            {"type": "text", "text": text_before_link},
+                            link_content,
+                        ],
+                    }
+                )
+            elif text_after_link:
+                content_list.append(
+                    {
+                        "type": "paragraph",
+                        "content": [
+                            link_content,
+                            {"type": "text", "text": text_after_link},
+                        ],
+                    }
+                )
+            else:
+                content_list.append(
+                    {
+                        "type": "paragraph",
+                        "content": [
+                            link_content,
+                        ],
+                    }
+                )
         if self.blockquote_pattern.match(line):
             match = self.blockquote_pattern.match(line)
             content = match.group(1)
@@ -42,11 +89,11 @@ class MarkdownConverter:
             )
             for n, content in enumerate(code_pairs):
                 if content[0]:
-                    content_list.append({"type": "text", "text": content[0]})
+                    content_list[-1]["content"].append({"type": "text", "text": content[0]})
                 if content[1] and not n == count_code - 1:
-                    content_list.append({"type": "text", "marks": [{"type": "code"}], "text": content[1]})
+                    content_list[-1]["content"].append({"type": "text", "marks": [{"type": "code"}], "text": content[1]})
                 elif content[1]:
-                    content_list.append({"type": "text", "marks": [{"type": "code"}], "text": content[1]})
+                    content_list[-1]["content"].append({"type": "text", "marks": [{"type": "code"}], "text": content[1]})
         else:
             content_list = self.handle_inline_formatting(line)
 
@@ -586,9 +633,7 @@ md_text_nested_list = """
 def main():
     md_text = """
 Hello
-- This could be `code` you know, just `like` this
 - Maybe this breaks the `code` [stuff](https://whoraised.substack.com/)
-- who knows what **else** could be broken
     """
     parser = MarkdownConverter()
     parser.parse_markdown(md_text)
