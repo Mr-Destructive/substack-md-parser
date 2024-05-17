@@ -57,7 +57,9 @@ def convert_to_substack(md_text):
     return substack_post
 
 class SubstackClient:
-    def __init__(self, substack_name, userId, email, password, magic_link, session_id):
+    def __init__(self, substack_name="", userId="", email="", password="", magic_link="", session_id=""):
+        if not (userId and email and password) and not magic_link:
+            raise Exception("Missing credentials")
         self.substack_name = substack_name
         self.substack_url = f"https://{self.substack_name}.substack.com"
         self.client = requests.Session()
@@ -236,12 +238,12 @@ if __name__ == "__main__":
 
     from dotenv import load_dotenv
     load_dotenv()
-    sessionID = environ.get("SUBSTACK_SESSION_ID")
-    userId = environ.get("SUBSTACK_USER_ID")
-    substackName = environ.get("SUBSTACK_NAME")
-    email = environ.get("SUBSTACK_EMAIL")
-    password = environ.get("SUBSTACK_PASSWORD")
-    magic_link = environ.get("SUBSTACK_MAGIC_LINK")
+    sessionID = environ.get("SUBSTACK_SESSION_ID", "")
+    userId = environ.get("SUBSTACK_USER_ID", "")
+    substackName = environ.get("SUBSTACK_NAME", "")
+    email = environ.get("SUBSTACK_EMAIL", "")
+    password = environ.get("SUBSTACK_PASSWORD", "")
+    magic_link = environ.get("SUBSTACK_MAGIC_LINK", "")
     if not password and not magic_link:
         send_magic_link(email)
         magic_link = input("Enter magic link: ")
