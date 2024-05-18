@@ -18,8 +18,8 @@ class MarkdownConverter:
         self.italic_pattern = re.compile(r"\*(.*?)\*")  # Pattern for italic text
         self.strike_pattern = re.compile(r"~~(.*?)~~")  # Pattern for strikethrough text
         self.blockquote_pattern = re.compile(r"> (.*?)$")  # Pattern for quote
-        self.code_pattern = r"`(.*?)`" # Pattern for code highlight
-        self.code_block_pattern = r'```([a-zA-Z]+)\n'  # Pattern for code block
+        self.code_pattern = r"`(.*?)`"  # Pattern for code highlight
+        self.code_block_pattern = r"```([a-zA-Z]+)\n"  # Pattern for code block
         # find the language of the code and then the code
         self.open_tags = []
         self.code_block_lines = []
@@ -79,27 +79,45 @@ class MarkdownConverter:
             match = self.blockquote_pattern.match(line)
             content = match.group(1)
             self.draft_body["content"].append(
-                {"type": "blockquote", "content": [{"type": "paragraph", "content": [{"type": "text", "text": content}]}]}
+                {
+                    "type": "blockquote",
+                    "content": [
+                        {
+                            "type": "paragraph",
+                            "content": [{"type": "text", "text": content}],
+                        }
+                    ],
+                }
             )
         elif re.findall(self.code_pattern, line):
-            code_pairs = self.extract_text_before_and_after_code(line) 
+            code_pairs = self.extract_text_before_and_after_code(line)
             count_code = len(code_pairs)
-            content_list.append(
-                {"type": "paragraph", "content": []}
-            )
+            content_list.append({"type": "paragraph", "content": []})
             for n, content in enumerate(code_pairs):
                 if content[0]:
-                    content_list[-1]["content"].append({"type": "text", "text": content[0]})
+                    content_list[-1]["content"].append(
+                        {"type": "text", "text": content[0]}
+                    )
                 if content[1] and not n == count_code - 1:
-                    content_list[-1]["content"].append({"type": "text", "marks": [{"type": "code"}], "text": content[1]})
+                    content_list[-1]["content"].append(
+                        {
+                            "type": "text",
+                            "marks": [{"type": "code"}],
+                            "text": content[1],
+                        }
+                    )
                 elif content[1]:
-                    content_list[-1]["content"].append({"type": "text", "marks": [{"type": "code"}], "text": content[1]})
+                    content_list[-1]["content"].append(
+                        {
+                            "type": "text",
+                            "marks": [{"type": "code"}],
+                            "text": content[1],
+                        }
+                    )
         else:
             content_list = self.handle_inline_formatting(line)
 
         return content_list
-
-
 
     def parse_markdown(self, md_text):
         # Split markdown text into lines
@@ -110,7 +128,7 @@ class MarkdownConverter:
         language = ""
 
         for line in lines:
-            #if not code_block:
+            # if not code_block:
             #    line = line.strip()
 
             if line.startswith("```") and line != "```":
@@ -129,45 +147,26 @@ class MarkdownConverter:
                 list_data = []
                 for item in list_item.split("\n"):
                     data = self.parse_text(item)
-                    list_data.append(
-                        {
-                            "type": "paragraph",
-                            "content": data
-                        }
-                    )
+                    list_data.append({"type": "paragraph", "content": data})
                 current_list["content"].append(
-                    {
-                        "type": "list_item",
-                        "content": list_data
-                    }
+                    {"type": "list_item", "content": list_data}
                 )
             elif self.ordered_list_pattern.match(line):
                 if current_list is None or current_list["type"] != "ordered_list":
                     # Start a new ordered list
                     current_list = {
                         "type": "ordered_list",
-                        "attrs": {
-                            "start": 1,
-                            "order": 1
-                        },
-                        "content": []
+                        "attrs": {"start": 1, "order": 1},
+                        "content": [],
                     }
 
                 list_item = self.ordered_list_pattern.match(line).group(2).strip()
                 list_data = []
                 for item in list_item.split("\n"):
                     data = self.parse_text(item)
-                    list_data.append(
-                        {
-                            "type": "paragraph",
-                            "content": data
-                        }
-                    )
+                    list_data.append({"type": "paragraph", "content": data})
                 current_list["content"].append(
-                    {
-                        "type": "list_item",
-                        "content": list_data
-                    }
+                    {"type": "list_item", "content": list_data}
                 )
             elif self.link_pattern.search(line):
                 match = self.link_pattern.search(line)
@@ -220,17 +219,23 @@ class MarkdownConverter:
                 match = self.blockquote_pattern.match(line)
                 content = match.group(1)
                 self.draft_body["content"].append(
-                    {"type": "blockquote", "content": [{"type": "paragraph", "content": [{"type": "text", "text": content}]}]}
+                    {
+                        "type": "blockquote",
+                        "content": [
+                            {
+                                "type": "paragraph",
+                                "content": [{"type": "text", "text": content}],
+                            }
+                        ],
+                    }
                 )
             elif re.findall(self.code_pattern, line) and not code_block:
                 """
-    Some more `code goes here`, `some`, `more`, and `somehere` and `there`
+                Some more `code goes here`, `some`, `more`, and `somehere` and `there`
                 """
-                code_pairs = self.extract_text_before_and_after_code(line) 
+                code_pairs = self.extract_text_before_and_after_code(line)
                 count_code = len(code_pairs)
-                self.draft_body["content"].append(
-                    {"type": "paragraph", "content": []}
-                )
+                self.draft_body["content"].append({"type": "paragraph", "content": []})
                 for n, content in enumerate(code_pairs):
                     if content[0]:
                         self.draft_body["content"][-1]["content"].append(
@@ -238,13 +243,21 @@ class MarkdownConverter:
                         )
                     if content[1] and not n == count_code - 1:
                         self.draft_body["content"][-1]["content"].append(
-                            {"type": "text", "marks": [{"type": "code"}], "text": content[1]}
+                            {
+                                "type": "text",
+                                "marks": [{"type": "code"}],
+                                "text": content[1],
+                            }
                         )
                     elif content[1]:
                         self.draft_body["content"][-1]["content"].append(
-                                {"type": "text", "marks": [{"type": "code"}], "text": content[1]},
+                            {
+                                "type": "text",
+                                "marks": [{"type": "code"}],
+                                "text": content[1],
+                            },
                         )
-                #{\"type\":\"paragraph\",\"content\":[{\"type\":\"text\",\"marks\":[{\"type\":\"code\"}],\"text\":\"def hello(string):\"}]},
+                # {\"type\":\"paragraph\",\"content\":[{\"type\":\"text\",\"marks\":[{\"type\":\"code\"}],\"text\":\"def hello(string):\"}]},
             elif re.findall(self.code_block_pattern, line) or code_block:
                 # If line matches the start of a code block
                 if not self.code_block_lines:
@@ -263,7 +276,9 @@ class MarkdownConverter:
             else:
                 content = self.handle_inline_formatting(line)
                 if content:
-                    self.draft_body["content"].append({"type": "paragraph", "content": content})
+                    self.draft_body["content"].append(
+                        {"type": "paragraph", "content": content}
+                    )
                 # Add any remaining text
                 # self.current_text += line
                 if line:
@@ -274,10 +289,7 @@ class MarkdownConverter:
                     current_list = None
 
             if not line:
-                self.draft_body["content"].append({
-                    "type": "paragraph",
-                    "content": []
-                })
+                self.draft_body["content"].append({"type": "paragraph", "content": []})
         if current_list:
             self.draft_body["content"].append(current_list)
 
@@ -394,14 +406,13 @@ class MarkdownConverter:
             {"type": "paragraph", "content": strikethrough_content}
         )
 
-
     def extract_text_before_and_after_code(self, line):
         code_pattern = r"`([^`]+)`"
         parts = re.split(code_pattern, line)
         pairs = []
         inside_code_block = False
-        before_text = ''
-        after_text = ''
+        before_text = ""
+        after_text = ""
 
         for part in parts:
             if inside_code_block:
@@ -412,8 +423,8 @@ class MarkdownConverter:
 
             if not inside_code_block:
                 pairs.append((before_text, after_text))
-                before_text = ''
-                after_text = ''
+                before_text = ""
+                after_text = ""
         if before_text or after_text:
             pairs.append((before_text, after_text))
 
@@ -459,25 +470,20 @@ class MarkdownConverter:
 
         # Add the paragraph node to the draft body
         return content
-    
+
     def add_codeblock(self, language, content):
-        # remove first and last 
+        # remove first and last
         content = content[1:-1]
         combine_code_block = "\n".join(content)
         code_blocks = [
             {
                 "type": "code_block",
                 "attrs": {"language": language},
-                "content": [
-                    {"type": "text", "text": combine_code_block}
-                ],
+                "content": [{"type": "text", "text": combine_code_block}],
             }
         ]
         for code_block in code_blocks:
-            self.draft_body["content"].append(
-                    code_block
-            )
-
+            self.draft_body["content"].append(code_block)
 
     def convert(self):
         return self.draft_body
@@ -630,6 +636,7 @@ md_text_nested_list = """
 - List item 2
 """
 
+
 def main():
     md_text = """
 Hello
@@ -654,4 +661,4 @@ Hello
     md_text = "This is ~~cut badly~~ **~~and boldy~~**"
 
 
-#main()
+# main()

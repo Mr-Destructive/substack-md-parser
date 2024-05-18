@@ -20,18 +20,22 @@ class DraftBylines:
 
 
 class Draft:
-    def __init__(self, draft_title, draft_body, draft_bylines, audience=None, post_type=None):
+    def __init__(
+        self, draft_title, draft_body, draft_bylines, audience=None, post_type=None
+    ):
         self.draft_title = draft_title
         self.draft_bylines = draft_bylines
         self.draft_body = draft_body
 
+
 def parse(s):
-    html_content = markdown.markdown(s, extensions=['extra'])
+    html_content = markdown.markdown(s, extensions=["extra"])
     return html_content
+
 
 def parse_html_to_substack(html_content):
     return html_content
-    #return {
+    # return {
     #    "type": NodeType.Doc,
     #    "content": [{
     #        "type": NodeType.Paragraph,
@@ -42,22 +46,33 @@ def parse_html_to_substack(html_content):
     #            }
     #        ]
     #    }]
-    #}
+    # }
+
+
 def convert_to_substack(md_text):
-    #html_content = parse(md_text)
-    #substack_post = parse_html_to_substack(html_content)
+    # html_content = parse(md_text)
+    # substack_post = parse_html_to_substack(html_content)
     substack_parser = MarkdownConverter()
     substack_parser.parse_markdown(md_text)
     contents = substack_parser.convert()
     substack_post = contents
-    #substack_post = {
+    # substack_post = {
     #    "type": NodeType.Doc,
     #    "content": contents
-    #}
+    # }
     return substack_post
 
+
 class SubstackClient:
-    def __init__(self, substack_name="", userId="", email="", password="", magic_link="", session_id=""):
+    def __init__(
+        self,
+        substack_name="",
+        userId="",
+        email="",
+        password="",
+        magic_link="",
+        session_id="",
+    ):
         if not (userId and email and password) and not magic_link:
             raise Exception("Missing credentials")
         self.substack_name = substack_name
@@ -123,8 +138,8 @@ class SubstackClient:
             "Content-Type": "application/json",
             "Cookie": f"substack.sid={self.session_id}",
         }
-        #cookies = RequestsCookieJar()
-        #cookies.set("substack.sid", self.session_id)
+        # cookies = RequestsCookieJar()
+        # cookies.set("substack.sid", self.session_id)
 
         try:
             if http_method == "POST":
@@ -139,7 +154,6 @@ class SubstackClient:
         except requests.exceptions.RequestException as e:
             raise Exception(f"Request failed: {str(e)}")
 
-
     def get_all_drafts(self):
         endpoint = f"{self.substack_url}/api/v1/post_management/drafts/?offset=0&limit=25&order_by=draft_updated_at&order_direction=desc"
         resp = self._send_request(endpoint, None, "GET")
@@ -151,8 +165,10 @@ class SubstackClient:
             draft = draft[0]
         else:
             return None
-        
-        draft_obj = self._send_request(f"{self.substack_url}/api/v1/drafts/{draft.get('id')}/", None, "GET")
+
+        draft_obj = self._send_request(
+            f"{self.substack_url}/api/v1/drafts/{draft.get('id')}/", None, "GET"
+        )
         return draft_obj
 
     def update_draft(self, title):
@@ -170,10 +186,7 @@ class SubstackClient:
 
         draft = {
             "draft_title": "test",
-            "draft_bylines": [{
-                "id": int(self.userId),
-                "is_guest": False
-            }],
+            "draft_bylines": [{"id": int(self.userId), "is_guest": False}],
             "draft_body": json.dumps(doc),
             "draft_subtitle": "",
             "draft_podcast_url": "",
@@ -185,7 +198,7 @@ class SubstackClient:
             "section_chosen": False,
             "draft_section_id": None,
             "free_podcast_url": None,
-    }
+        }
         with open("output1.json", "w") as file:
             json.dump(draft, file, indent=4)
         resp = self.edit_draft(draft_id, draft)
@@ -198,10 +211,7 @@ class SubstackClient:
         substack_json = substack_post_json
         draft = {
             "draft_title": title,
-            "draft_bylines": [{
-                "id": int(self.userId),
-                "is_guest": False
-            }],
+            "draft_bylines": [{"id": int(self.userId), "is_guest": False}],
             "draft_body": substack_json,
             "draf_subtitle": "",
             "draft_podcast_url": "",
@@ -223,6 +233,7 @@ class SubstackClient:
         new_draft = self.create_new_draft(draft)
         return new_draft
 
+
 def send_magic_link(email):
     body = {
         "email": email,
@@ -237,6 +248,7 @@ def send_magic_link(email):
 if __name__ == "__main__":
 
     from dotenv import load_dotenv
+
     load_dotenv()
     sessionID = environ.get("SUBSTACK_SESSION_ID", "")
     userId = environ.get("SUBSTACK_USER_ID", "")
@@ -248,12 +260,13 @@ if __name__ == "__main__":
         send_magic_link(email)
         magic_link = input("Enter magic link: ")
 
-    client = SubstackClient(substackName, userId, email, password, magic_link, sessionID)
+    client = SubstackClient(
+        substackName, userId, email, password, magic_link, sessionID
+    )
     draft_title = "test"
 
     print(client.get_all_drafts())
-    #draft = client.get_draft("144553105")
-    #draft = client.create_draft(draft_title, "") or {}
-    #client.update_draft(draft.get("draft_title", ""))
+    # draft = client.get_draft("144553105")
+    # draft = client.create_draft(draft_title, "") or {}
+    # client.update_draft(draft.get("draft_title", ""))
     client.update_draft(draft_title)
-

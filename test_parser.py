@@ -25,107 +25,78 @@ This is how you add a new paragraph to your post!
         parser.parse_markdown(md_text)
         parsed = parser.convert()
         expected_structure = {
-          "type": "doc",
-          "content": [
-            {
-              "type": "heading",
-              "attrs": {
-                "level": 1
-              },
-              "content": [
+            "type": "doc",
+            "content": [
                 {
-                  "type": "text",
-                  "text": "Heading 1"
-                }
-              ]
-            },
-            {
-              "type": "paragraph",
-              "content": [
-                {
-                  "type": "text",
-                  "text": "This is how you add a new paragraph to your post!"
-                }
-              ]
-            },
-            {
-              "type": "ordered_list",
-              "attrs": {
-                "start": 1,
-                "order": 1
-              },
-              "content": [
-                {
-                  "type": "list_item",
-                  "content": [
-                    {
-                      "type": "paragraph",
-                      "content": [
-                        {
-                          "type": "text",
-                          "text": "List item 1"
-                        }
-                      ]
-                    }
-                  ]
+                    "type": "heading",
+                    "attrs": {"level": 1},
+                    "content": [{"type": "text", "text": "Heading 1"}],
                 },
                 {
-                  "type": "list_item",
-                  "content": [
-                    {
-                      "type": "paragraph",
-                      "content": [
+                    "type": "paragraph",
+                    "content": [
                         {
-                          "type": "text",
-                          "text": "List item 2"
+                            "type": "text",
+                            "text": "This is how you add a new paragraph to your post!",
                         }
-                      ]
-                    }
-                  ]
+                    ],
                 },
                 {
-                  "type": "list_item",
-                  "content": [
-                    {
-                      "type": "paragraph",
-                      "content": [
+                    "type": "ordered_list",
+                    "attrs": {"start": 1, "order": 1},
+                    "content": [
                         {
-                          "type": "text",
-                          "text": "List item 3"
+                            "type": "list_item",
+                            "content": [
+                                {
+                                    "type": "paragraph",
+                                    "content": [
+                                        {"type": "text", "text": "List item 1"}
+                                    ],
+                                }
+                            ],
+                        },
+                        {
+                            "type": "list_item",
+                            "content": [
+                                {
+                                    "type": "paragraph",
+                                    "content": [
+                                        {"type": "text", "text": "List item 2"}
+                                    ],
+                                }
+                            ],
+                        },
+                        {
+                            "type": "list_item",
+                            "content": [
+                                {
+                                    "type": "paragraph",
+                                    "content": [
+                                        {"type": "text", "text": "List item 3"}
+                                    ],
+                                }
+                            ],
+                        },
+                    ],
+                },
+                {"type": "paragraph", "content": []},
+                {
+                    "type": "heading",
+                    "attrs": {"level": 2},
+                    "content": [{"type": "text", "text": "Heading 2"}],
+                },
+                {
+                    "type": "paragraph",
+                    "content": [
+                        {
+                            "type": "text",
+                            "text": "This is how you add a new paragraph to your post!",
                         }
-                      ]
-                    }
-                  ]
-                }
-              ]
-            },
-            {
-                "type": "paragraph",
-                "content": []
-            },
-            {
-              "type": "heading",
-              "attrs": {
-                "level": 2
-              },
-              "content": [
-                {
-                  "type": "text",
-                  "text": "Heading 2"
-                }
-              ]
-            },
-            {
-              "type": "paragraph",
-              "content": [
-                {
-                  "type": "text",
-                  "text": "This is how you add a new paragraph to your post!"
-                }
-              ]
-            }
-          ]
-}
+                    ],
+                },
+            ],
+        }
 
         self.assertDictEqual(parsed, expected_structure)
 
@@ -515,12 +486,19 @@ Some more `code goes here` and `there`
                         {"type": "text", "text": " highlighted."},
                     ],
                 },
-                {"type": "paragraph", "content": [{"type": "text", "text": "nothing."}]},
+                {
+                    "type": "paragraph",
+                    "content": [{"type": "text", "text": "nothing."}],
+                },
                 {
                     "type": "paragraph",
                     "content": [
                         {"type": "text", "text": "Some more "},
-                        {"type": "text", "marks": [{"type": "code"}], "text": "code goes here"},
+                        {
+                            "type": "text",
+                            "marks": [{"type": "code"}],
+                            "text": "code goes here",
+                        },
                         {"type": "text", "text": " and "},
                         {"type": "text", "marks": [{"type": "code"}], "text": "there"},
                     ],
@@ -537,7 +515,7 @@ Some more `code goes here` and `there`
         - [View 2](https://whoraised.substack.com/)
         - [View 3](https://whoraised.substack.com/)
         """
-        expected_structure ={
+        expected_structure = {
             "type": "doc",
             "content": [
                 {
@@ -552,7 +530,6 @@ Some more `code goes here` and `there`
                                         {
                                             "type": "text",
                                             "content": "This is a link ",
-
                                         },
                                         {
                                             "type": "text",
@@ -568,7 +545,7 @@ Some more `code goes here` and `there`
                                                 }
                                             ],
                                             "text": "View 1",
-                                        }
+                                        },
                                     ],
                                 }
                             ],
