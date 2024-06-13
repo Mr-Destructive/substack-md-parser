@@ -265,7 +265,6 @@ if __name__ == "__main__":
     )
     draft_title = "test"
 
-    print(client.get_all_drafts())
     # draft = client.get_draft("144553105")
     # draft = client.create_draft(draft_title, "") or {}
     # client.update_draft(draft.get("draft_title", ""))
