@@ -299,11 +299,6 @@ class MarkdownConverter:
             content[0]["marks"] = [{"type": mark}]
         self.draft_body["content"].append({"type": "paragraph", "content": content})
 
-    def add_paragraph(self, content):
-        self.draft_body["content"].append(
-            {"type": "paragraph", "content": [{"type": "text", "text": content}]}
-        )
-
     def add_heading(self, content, level=1):
         self.draft_body["content"].append(
             {
@@ -311,20 +306,6 @@ class MarkdownConverter:
                 "attrs": {"level": level},
                 "content": [{"type": "text", "text": content}],
             }
-        )
-
-    def add_bullet_list(self, items):
-        list_content = [
-            {
-                "type": "list_item",
-                "content": [
-                    {"type": "paragraph", "content": [{"type": "text", "text": item}]}
-                ],
-            }
-            for item in items
-        ]
-        self.draft_body["content"].append(
-            {"type": "bullet_list", "content": list_content}
         )
 
     def add_link(self, link_text, link_url):
@@ -345,66 +326,6 @@ class MarkdownConverter:
         }
         return link_node
 
-    def add_bold_text(self, line):
-        bold_matches = re.finditer(r"\*\*(.*?)\*\*", line)
-        bold_content = []
-        start_index = 0
-        for match in bold_matches:
-            if match.start() > start_index:
-                bold_content.append(
-                    {"type": "text", "text": line[start_index : match.start()]}
-                )
-            bold_content.append(
-                {"type": "text", "marks": [{"type": "strong"}], "text": match.group(1)}
-            )
-            start_index = match.end()
-        if start_index < len(line):
-            bold_content.append({"type": "text", "text": line[start_index:]})
-        self.draft_body["content"].append(
-            {"type": "paragraph", "content": bold_content}
-        )
-
-    def add_italic_text(self, line):
-        italic_matches = re.finditer(r"\*(.*?)\*", line)
-        italic_content = []
-        start_index = 0
-        for match in italic_matches:
-            if match.start() > start_index:
-                italic_content.append(
-                    {"type": "text", "text": line[start_index : match.start()]}
-                )
-            italic_content.append(
-                {"type": "text", "marks": [{"type": "italic"}], "text": match.group(1)}
-            )
-            start_index = match.end()
-        if start_index < len(line):
-            italic_content.append({"type": "text", "text": line[start_index:]})
-        self.draft_body["content"].append(
-            {"type": "paragraph", "content": italic_content}
-        )
-
-    def add_strikethrough_text(self, line):
-        strikethrough_matches = re.finditer(r"~~(.*?)~~", line)
-        strikethrough_content = []
-        start_index = 0
-        for match in strikethrough_matches:
-            if match.start() > start_index:
-                strikethrough_content.append(
-                    {"type": "text", "text": line[start_index : match.start()]}
-                )
-            strikethrough_content.append(
-                {
-                    "type": "text",
-                    "marks": [{"type": "strikethrough"}],
-                    "text": match.group(1),
-                }
-            )
-            start_index = match.end()
-        if start_index < len(line):
-            strikethrough_content.append({"type": "text", "text": line[start_index:]})
-        self.draft_body["content"].append(
-            {"type": "paragraph", "content": strikethrough_content}
-        )
 
     def extract_text_before_and_after_code(self, line):
         code_pattern = r"`([^`]+)`"

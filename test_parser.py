@@ -6,7 +6,6 @@ class TestSubstackParser(unittest.TestCase):
     maxDiff = None
 
     def test_substack_md_parser(self):
-
         import parser
         import json
 

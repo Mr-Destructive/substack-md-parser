@@ -1,3 +1,3 @@
 from .parser import MarkdownConverter
 
-__all__ = ['MarkdownConverter']
+__all__ = ["MarkdownConverter"]
